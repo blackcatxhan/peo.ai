@@ -4,24 +4,24 @@ export const darkTheme = createTheme({
   palette: {
     mode: 'dark',
     primary: {
-      main: '#6C63FF', // Modern purple/indigo
-      light: '#9D97FF',
-      dark: '#4B44CC',
+      main: '#7C4DFF', // Rich violet
+      light: '#B47CFF',
+      dark: '#5835CC',
       contrastText: '#FFFFFF',
     },
     secondary: {
-      main: '#FF6584', // Vibrant coral/pink
-      light: '#FF8FA3',
-      dark: '#D14D69',
+      main: '#FF4081', // Vibrant pink
+      light: '#FF79B0',
+      dark: '#C60055',
       contrastText: '#FFFFFF',
     },
     background: {
-      default: '#121212',
-      paper: '#1E1E2E', // Slightly blueish dark background for cards
+      default: '#0A0A1A', // Deeper, more sophisticated dark background
+      paper: '#141428', // Rich dark background for cards with slight blue tint
     },
     text: {
-      primary: '#FFFFFF',
-      secondary: '#B0B0C0', // Slightly blueish gray for secondary text
+      primary: '#F8F8FF', // Ghost white for better readability
+      secondary: '#B8B8D0', // Refined secondary text color
     },
     error: {
       main: '#FF5252',
@@ -131,34 +131,38 @@ export const darkTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
-          padding: '10px 20px',
-          boxShadow: 'none',
-          transition: 'all 0.2s ease-in-out',
+          borderRadius: 14,
+          padding: '12px 24px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           '&:hover': {
-            transform: 'translateY(-2px)',
-            boxShadow: '0 5px 15px rgba(0, 0, 0, 0.3)',
+            transform: 'translateY(-2px) scale(1.02)',
+            boxShadow: '0 8px 20px rgba(0, 0, 0, 0.25)',
           },
         },
         containedPrimary: {
-          background: 'linear-gradient(45deg, #6C63FF 30%, #7E76FF 90%)',
+          background: 'linear-gradient(45deg, #7C4DFF 30%, #9D6FFF 90%)',
         },
         containedSecondary: {
-          background: 'linear-gradient(45deg, #FF6584 30%, #FF7A97 90%)',
+          background: 'linear-gradient(45deg, #FF4081 30%, #FF79B0 90%)',
         },
       },
     },
     MuiPaper: {
       styleOverrides: {
         root: {
-          borderRadius: 12,
+          borderRadius: 16,
           backgroundImage: 'none',
+          border: '1px solid rgba(255, 255, 255, 0.05)',
+          backdropFilter: 'blur(12px)',
         },
         elevation1: {
-          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.15)',
+          boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+          background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.95) 0%, rgba(15, 15, 30, 0.95) 100%)',
         },
         elevation3: {
-          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+          boxShadow: '0 8px 25px rgba(0, 0, 0, 0.3)',
+          background: 'linear-gradient(180deg, rgba(25, 25, 50, 0.95) 0%, rgba(20, 20, 40, 0.95) 100%)',
         },
       },
     },

@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, Container, Typography, TextField, Button, Paper, IconButton, AppBar, Toolbar } from '@mui/material';
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { LandingPage, Footer } from './components';
 
 // Keep these imports as they'll be used for the enhanced code block highlighting
 import ReactMarkdown from 'react-markdown';
@@ -11,6 +13,28 @@ import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 const API_URL = 'http://localhost:5000';
 
 const App = () => {
+  // Add keyframes for glow animation
+  const keyframes = `
+    @keyframes glow {
+      from {
+        box-shadow: 0 0 20px rgba(124, 77, 255, 0.4), 0 0 40px rgba(255, 64, 129, 0.2);
+      }
+      to {
+        box-shadow: 0 0 30px rgba(124, 77, 255, 0.6), 0 0 60px rgba(255, 64, 129, 0.3);
+      }
+    }
+  `;
+
+  useEffect(() => {
+    // Add keyframes to document
+    const style = document.createElement('style');
+    style.innerHTML = keyframes;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   const [prompt, setPrompt] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversations, setConversations] = useState([]);
@@ -343,293 +367,217 @@ const App = () => {
     );
   };
 
-  return (
+  const renderApp = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar position="static" elevation={0}>
-        <Toolbar>
-          <Typography variant="h5" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', background: 'linear-gradient(45deg, #6C63FF 30%, #FF6584 90%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+      <AppBar position="sticky" elevation={0} sx={{
+        background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.95) 0%, rgba(15, 15, 30, 0.95) 100%)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        top: 0,
+        zIndex: 1100
+      }}>
+        <Toolbar sx={{ py: 1.5 }}>
+          <Typography 
+            variant="h5" 
+            component={Link} 
+            to="/"
+            sx={{
+              flexGrow: 1,
+              fontWeight: 'bold',
+              background: 'linear-gradient(45deg, #7C4DFF 30%, #FF4081 90%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              letterSpacing: '-0.02em',
+              textDecoration: 'none',
+              cursor: 'pointer'
+            }}
+          >
             PEO.AI
           </Typography>
-          <Typography variant="subtitle1" color="text.secondary" sx={{ opacity: 0.8 }}>
-            Prompt Engineering Optimizer
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      
-      <Container maxWidth="md" sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', py: 4 }}>
-        <Paper 
-          elevation={3} 
-          sx={{ 
-            flexGrow: 1, 
-            mb: 2, 
-            p: 3, 
-            overflowY: 'auto',
-            '&::-webkit-scrollbar': {
-              width: '6px',
-              backgroundColor: 'transparent',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: 'transparent',
-              margin: '4px 0',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '10px',
-              transition: 'all 0.2s ease-in-out',
-            },
-            '&::-webkit-scrollbar-thumb:hover': {
-              background: 'rgba(255, 255, 255, 0.2)',
-            },
-            display: 'flex',
-            flexDirection: 'column',
-            maxHeight: 'calc(100vh - 240px)',
-            bgcolor: 'background.paper',
-            borderRadius: 3,
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-            backgroundImage: 'radial-gradient(circle at 100% 100%, rgba(108, 99, 255, 0.03) 0%, transparent 60%)',
-            backdropFilter: 'blur(8px)'
-          }}
-        >
-          {conversations.length === 0 ? (
-            <Box sx={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              height: '100%',
-              color: 'text.secondary',
-              padding: 4
-            }}>
-              <Box 
-                sx={{ 
-                  mb: 3, 
-                  width: '80px', 
-                  height: '80px', 
-                  borderRadius: '50%',
-                  background: 'linear-gradient(45deg, #6C63FF 30%, #FF6584 90%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxShadow: '0 8px 20px rgba(108, 99, 255, 0.3)',
-                  animation: 'pulse 2s infinite',
-                  '@keyframes pulse': {
-                    '0%': {
-                      transform: 'scale(1)',
-                      boxShadow: '0 8px 20px rgba(108, 99, 255, 0.3)'
-                    },
-                    '50%': {
-                      transform: 'scale(1.05)',
-                      boxShadow: '0 12px 24px rgba(108, 99, 255, 0.4)'
-                    },
-                    '100%': {
-                      transform: 'scale(1)',
-                      boxShadow: '0 8px 20px rgba(108, 99, 255, 0.3)'
-                    },
-                  }
-                }}
-              >
-                <Typography variant="h4" sx={{ color: 'white', fontWeight: 'bold' }}>P</Typography>
-              </Box>
-              <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', mb: 2 }}>
-                Welcome to PEO.AI
-              </Typography>
-              <Typography variant="body1" align="center" sx={{ maxWidth: '500px', mb: 3, lineHeight: 1.6 }}>
-                Enter your prompt below to get started with prompt engineering optimization. Our AI will help you craft better prompts for more effective results.
-              </Typography>
-              <Box sx={{ 
-                p: 2, 
-                borderRadius: 2, 
-                bgcolor: 'rgba(108, 99, 255, 0.05)', 
-                border: '1px dashed rgba(108, 99, 255, 0.3)',
-                maxWidth: '500px'
-              }}>
-                <Typography variant="body2" align="center" sx={{ fontStyle: 'italic' }}>
-                  Tip: Be specific about your goals and provide context for better prompt optimization.
-                </Typography>
-              </Box>
-            </Box>
-          ) : (
-            conversations.map((msg, index) => (
-              <Box 
-                key={index} 
-                sx={{
-                  mb: 3,
-                  alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                  maxWidth: '80%',
-                  animation: 'fadeIn 0.3s ease-out',
-                  '@keyframes fadeIn': {
-                    '0%': {
-                      opacity: 0,
-                      transform: 'translateY(10px)'
-                    },
-                    '100%': {
-                      opacity: 1,
-                      transform: 'translateY(0)'
-                    },
-                  }
-                }}
-              >
-                <Paper 
-                  elevation={msg.role === 'user' ? 2 : 1} 
-                  sx={{
-                    p: 2.5,
-                    bgcolor: msg.role === 'user' ? 'primary.dark' : 'background.paper',
-                    borderRadius: msg.role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                    boxShadow: msg.role === 'user' 
-                      ? '0 4px 15px rgba(108, 99, 255, 0.2)' 
-                      : '0 4px 15px rgba(0, 0, 0, 0.1)',
-                    position: 'relative',
-                    '&::after': msg.role === 'user' ? {
-                      content: '""',
-                      position: 'absolute',
-                      bottom: 0,
-                      right: '-8px',
-                      width: '20px',
-                      height: '20px',
-                      background: 'linear-gradient(45deg, #4B44CC 30%, #6C63FF 90%)',
-                      borderRadius: '50%',
-                      zIndex: -1,
-                      opacity: 0.7
-                    } : {}
-                  }}
-                >
-                  {msg.role === 'user' ? (
-                    <Typography sx={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}>
-                      {msg.content}
-                    </Typography>
-                  ) : (
-                    renderModelResponse(msg.content)
-                  )}
-                </Paper>
-              </Box>
-            ))
-          )}
-          {isLoading && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', my: 3, flexDirection: 'column' }}>
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                mb: 1,
-                '& > div': {
-                  width: '12px',
-                  height: '12px',
-                  margin: '0 4px',
-                  borderRadius: '50%',
-                  backgroundColor: 'primary.main',
-                  animation: 'bounce 1.4s infinite ease-in-out both',
-                  '@keyframes bounce': {
-                    '0%, 80%, 100%': {
-                      transform: 'scale(0)',
-                      opacity: 0.3
-                    },
-                    '40%': {
-                      transform: 'scale(1)',
-                      opacity: 1
-                    }
-                  }
-                },
-                '& > div:nth-of-type(1)': {
-                  animationDelay: '-0.32s'
-                },
-                '& > div:nth-of-type(2)': {
-                  animationDelay: '-0.16s'
-                }
-              }}>
-                <div></div>
-                <div></div>
-                <div></div>
-              </Box>
-              <Typography color="text.secondary" sx={{ fontWeight: 500 }}>Generating response...</Typography>
-            </Box>
-          )}
-        </Paper>
-        
-        <Box component="form" onSubmit={handleSubmit} sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-          <TextField
-            fullWidth
-            variant="outlined"
-            placeholder={conversations.length > 0 ? "Enter your follow-up prompt here..." : "Enter your prompt here..."}
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            disabled={isLoading}
-            multiline
-            maxRows={4}
-            sx={{ 
-              mr: 1,
-              '& .MuiOutlinedInput-root': {
-                borderRadius: '16px',
-                transition: 'all 0.3s ease',
-                '&.Mui-focused': {
-                  boxShadow: '0 0 0 3px rgba(108, 99, 255, 0.2)',
-                },
-                '& fieldset': {
-                  borderColor: 'rgba(255, 255, 255, 0.12)',
-                },
-                '&:hover fieldset': {
-                  borderColor: 'rgba(108, 99, 255, 0.5)',
-                },
-              }
-            }}
-          />
           <Button 
-            type="submit" 
-            variant="contained" 
-            color="primary" 
-            disabled={isLoading || !prompt.trim()}
-            endIcon={<SendIcon />}
-            sx={{
-              minWidth: '100px',
-              height: '48px',
-              borderRadius: '24px',
-              fontWeight: 500,
-              boxShadow: '0 4px 12px rgba(108, 99, 255, 0.2)',
-              transition: 'all 0.3s ease',
+            color="inherit" 
+            onClick={clearConversation}
+            startIcon={<DeleteIcon />}
+            sx={{ 
+              ml: 2,
+              borderRadius: 2,
+              px: 2,
+              py: 0.75,
+              bgcolor: 'rgba(255, 255, 255, 0.05)',
               '&:hover': {
-                transform: 'translateY(-2px)',
-                boxShadow: '0 6px 16px rgba(108, 99, 255, 0.3)',
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
               }
             }}
           >
-            Send
+            Clear Chat
           </Button>
-          {conversations.length > 0 && (
-            <IconButton 
-              color="error" 
-              onClick={clearConversation} 
-              sx={{ 
-                ml: 1,
+        </Toolbar>
+      </AppBar>
+      
+      <Container maxWidth="lg" sx={{ flexGrow: 1, py: 4, display: 'flex', flexDirection: 'column' }}>
+        {conversations.length === 0 && (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 4,
+              mb: 3,
+              borderRadius: 2,
+              textAlign: 'center',
+              bgcolor: 'rgba(30, 30, 50, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Box
+              sx={{
+                width: 80,
+                height: 80,
                 borderRadius: '50%',
-                width: '48px',
-                height: '48px',
-                transition: 'all 0.2s ease',
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 82, 82, 0.1)',
-                  transform: 'rotate(10deg)'
-                }
+                background: 'linear-gradient(45deg, #7C4DFF 30%, #FF4081 90%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                mb: 2,
+                fontSize: '2rem',
+                fontWeight: 'bold',
+                color: 'white',
+                boxShadow: '0 0 30px rgba(124, 77, 255, 0.4), 0 0 60px rgba(255, 64, 129, 0.2)',
+                animation: 'glow 2s ease-in-out infinite alternate'
               }}
-              disabled={isLoading}
             >
-              <DeleteIcon />
-            </IconButton>
+              P
+            </Box>
+            <Typography variant="h5" sx={{ mb: 2, fontWeight: 'bold' }}>
+              Welcome to PEO.AI
+            </Typography>
+            <Typography sx={{ mb: 3, color: 'text.secondary', maxWidth: 500 }}>
+              Enter your prompt below to get started with prompt engineering optimization. Our AI will help you craft better prompts for more effective results.
+            </Typography>
+            <Typography variant="body2" sx={{ 
+              fontStyle: 'italic', 
+              color: 'text.secondary',
+              bgcolor: 'rgba(124, 77, 255, 0.1)',
+              p: 2,
+              borderRadius: 2,
+              border: '1px solid rgba(124, 77, 255, 0.2)'
+            }}>
+              Tip: Be specific about your goals and provide context for better prompt optimization.
+            </Typography>
+          </Paper>
+        )}
+        <Box sx={{ flexGrow: 1, overflowY: 'auto', mb: 3 }}>
+          {conversations.map((message, index) => (
+            <Paper
+              key={index}
+              elevation={0}
+              sx={{
+                p: 2,
+                mb: 2,
+                borderRadius: 1.5,
+                bgcolor: message.role === 'user' 
+                  ? 'rgba(108, 99, 255, 0.15)' 
+                  : 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid',
+                borderColor: message.role === 'user'
+                  ? 'rgba(108, 99, 255, 0.3)'
+                  : 'rgba(255, 255, 255, 0.1)',
+                transition: 'all 0.2s ease-in-out'
+              }}
+            >
+              <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                  mb: 1, 
+                  color: message.role === 'user' ? '#9D91FF' : '#64FFDA',
+                  fontWeight: 'bold'
+                }}
+              >
+                {message.role === 'user' ? 'You' : 'PEO.AI'}
+              </Typography>
+              
+              {message.role === 'model' 
+                ? renderModelResponse(message.content)
+                : <Typography sx={{ whiteSpace: 'pre-wrap' }}>{message.content}</Typography>
+              }
+            </Paper>
+          ))}
+          
+          {isLoading && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+              <Typography sx={{ color: 'text.secondary' }}>Thinking...</Typography>
+            </Box>
           )}
         </Box>
+        
+        <Paper
+          component="form"
+          onSubmit={handleSubmit}
+          elevation={3}
+          sx={{
+            p: 1.5,
+            display: 'flex',
+            alignItems: 'center',
+            borderRadius: 2,
+            bgcolor: 'rgba(30, 30, 50, 0.6)',
+            backdropFilter: 'blur(8px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          <TextField
+            fullWidth
+            multiline
+            maxRows={4}
+            placeholder="Ask PEO.AI anything..."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            disabled={isLoading}
+            variant="standard"
+            InputProps={{
+              disableUnderline: true,
+            }}
+            sx={{
+              '& .MuiInputBase-input': {
+                py: 1,
+                px: 1,
+              }
+            }}
+          />
+          <IconButton 
+            type="submit" 
+            color="primary" 
+            disabled={isLoading || !prompt.trim()}
+            sx={{ 
+              ml: 1,
+              bgcolor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+              },
+              '&.Mui-disabled': {
+                bgcolor: 'rgba(255, 255, 255, 0.1)',
+                color: 'rgba(255, 255, 255, 0.3)',
+              }
+            }}
+          >
+            <SendIcon />
+          </IconButton>
+        </Paper>
       </Container>
-      
-      <Box component="footer" sx={{ 
-            py: 3, 
-            textAlign: 'center', 
-            bgcolor: 'background.default', // Changed from 'background.paper' to 'background.default'
-            borderTop: '1px solid rgba(255, 255, 255, 0.05)', 
-            mt: 2 
-          }}>
-            <Typography variant="body2" color="text.secondary" sx={{ opacity: 0.8, fontWeight: 500 }}>
-              PEO.AI - Prompt Engineering Optimizer © {new Date().getFullYear()}
-            </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1, opacity: 0.6 }}>
-              Optimize your prompts for better AI interactions
-            </Typography>
-          </Box>
+      <Footer />
     </Box>
+  );
+  
+  const location = useLocation();
+  
+  return (
+    <Routes>
+      <Route path="/" element={location.pathname === '/' ? <LandingPage /> : renderApp()} />
+      <Route path="/chat" element={renderApp()} />
+    </Routes>
   );
 };
 
