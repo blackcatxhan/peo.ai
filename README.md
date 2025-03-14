@@ -2,7 +2,7 @@
 
 A web application that helps optimize and enhance prompts for AI models using Google's Gemini API. PEO.AI provides real-time feedback and suggestions to improve your prompts for better AI interactions.
 
-https://github.com/user-attachments/assets/a06dc31f-a796-47bd-88ac-29c5775bc86c
+https://github.com/user-attachments/assets/0786c77d-1c38-4cf6-8b85-2700a5157675
 
 ## Features
 
