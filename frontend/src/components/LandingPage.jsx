@@ -60,10 +60,13 @@ const LandingPage = () => {
 
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <AppBar position="static" elevation={0} sx={{
+      <AppBar position="sticky" elevation={0} sx={{
         background: 'linear-gradient(180deg, rgba(20, 20, 40, 0.95) 0%, rgba(15, 15, 30, 0.95) 100%)',
         backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+        borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        top: 0,
+        zIndex: 1100,
+        borderRadius: '0px 0px 16px 16px',
       }}>
         <Toolbar sx={{ py: 1.5 }}>
           <Typography variant="h5" component="div" sx={{
@@ -174,6 +177,17 @@ const LandingPage = () => {
                     Get Started
                   </Button>
                   <Button 
+                    onClick={() => {
+                      const featuresSection = document.querySelector('h2');
+                      if (featuresSection) {
+                        const offset = -150;
+                        const elementPosition = featuresSection.getBoundingClientRect().top + window.pageYOffset;
+                        window.scrollTo({
+                          top: elementPosition + offset,
+                          behavior: 'smooth'
+                        });
+                      }
+                    }}
                     variant="outlined" 
                     size="large"
                     sx={{
@@ -451,7 +465,7 @@ const LandingPage = () => {
                       boxShadow: '0 12px 25px rgba(124, 77, 255, 0.4)',
                     },
                   }}
-                  href="/app"
+                  href="/chat"
                 >
                   Try It Now
                 </Button>
