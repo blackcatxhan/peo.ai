@@ -4,26 +4,29 @@ from google.genai import types
 from dotenv import load_dotenv
 load_dotenv()
 
-def generate(prompt: str):
-    client = genai.Client(
+def create_client():
+    return genai.Client(
         api_key=os.environ.get("GEMINI_API_KEY"),
     )
 
-    model = "gemini-2.0-flash"
-    contents = [
-        types.Content(
-            role="user",
-            parts=[
-                types.Part.from_text(text="""Here's my prompt:
+class Conversation:
+    def __init__(self):
+        self.client = create_client()
+        self.model = "gemini-2.0-flash"
+        self.conversation_history = [
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text="""Here's my prompt:
 
 <github_repo_code>
 Based on github repository codes given above, generate a creative-styled blog. Make sure to keep the blog fun and immersive for the readers. Use emojis."""),
-            ],
-        ),
-        types.Content(
-            role="model",
-            parts=[
-                types.Part.from_text(text="""
+                ],
+            ),
+            types.Content(
+                role="model",
+                parts=[
+                    types.Part.from_text(text="""
 **Enhancements Made:**
 
 *   **Clarity and Specificity:** The original prompt was vague. The enhanced prompt specifies what aspects of the code to focus on, the target audience, and the desired tone.
@@ -69,32 +72,10 @@ Blog Post (ready to be published on a platform like Medium or a personal website
 ```Output Format```
 ```
 """),
-# **Explanation of Prompt Sections:**
-
-# *   **\"You are a creative blog writer...\"**: This sets the AI's role and helps it understand the desired output.
-# *   **`github_repo_code`**: Uses delimiters to clearly mark where the code goes.  This is crucial.
-# *   **`Context`**: Provides background.  *Crucially*, it gives options that *you* need to choose from to tailor the post.  This is much better than a vague instruction.
-# *   **`Instructions`**: Breaks down the writing process into clear steps.  Each step has specific guidance.
-# *   **`Styling and Tone`**:  Specifies the desired style, use of emojis, and formatting.  This controls the *voice* of the blog.
-# *   **`Reasoning Request`**:  Forces the AI to explain its choices, which helps you understand its process and refine future prompts.
-# *   **`Output Format`**: Makes it clear what the final output should be.
-            ],
-        ),
-        types.Content(
-            role="user",
-            parts=[
-                types.Part.from_text(text=prompt),
-            ],
-        ),
-    ]
-    generate_content_config = types.GenerateContentConfig(
-        temperature=1,
-        top_p=0.95,
-        top_k=40,
-        max_output_tokens=8192,
-        response_mime_type="text/plain",
-        system_instruction=[
-            types.Part.from_text(text="""Your task is to enhance and optimize prompts. Follow these guides to complete your task.
+                ],
+            ),
+        ]
+        self.system_instruction = """Your task is to enhance and optimize prompts. Follow these guides to complete your task.
 
 # Here are some good practices for prompt engineering:
 
@@ -153,17 +134,63 @@ Consider limitations
 
 Be explicit about tradeoffs
 - Specify priorities (accuracy vs. creativity, brevity vs. detail)
-- Indicate what aspects are most important to you"""),
-        ],
-    )
+- Indicate what aspects are most important to you"""
 
-    for chunk in client.models.generate_content_stream(
-        model=model,
-        contents=contents,
-        config=generate_content_config,
-    ):
-        print(chunk.text, end="")
+    def generate(self, prompt: str, is_followup=False):
+        # Format the prompt based on whether it's a new prompt or follow-up
+        formatted_prompt = prompt if is_followup else f"Here's my prompt:\n{prompt}"
+        
+        # Add user message to conversation history
+        self.conversation_history.append(
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part.from_text(text=formatted_prompt),
+                ],
+            )
+        )
+        
+        generate_content_config = types.GenerateContentConfig(
+            temperature=1,
+            top_p=0.95,
+            top_k=40,
+            max_output_tokens=8192,
+            response_mime_type="text/plain",
+            system_instruction=[
+                types.Part.from_text(text=self.system_instruction),
+            ],
+        )
+
+        # Get the response
+        response_text = ""
+        for chunk in self.client.models.generate_content_stream(
+            model=self.model,
+            contents=self.conversation_history,
+            config=generate_content_config,
+        ):
+            print(chunk.text, end="")
+            response_text += chunk.text if chunk.text is not None else ""
+        
+        # Add model response to conversation history
+        self.conversation_history.append(
+            types.Content(
+                role="model",
+                parts=[
+                    types.Part.from_text(text=response_text),
+                ],
+            )
+        )
+        print("\n")  # Add a newline after the complete response
 
 if __name__ == "__main__":
+    conversation = Conversation()
+    
     prompt = input("[:] ")
-    generate("Here's my prompt:\n" + prompt)
+    conversation.generate(prompt)
+    
+    while True:
+        follow_up = input("\n[:] ")
+        if follow_up == "TERMINATE":
+            print("Goodbye!")
+            break
+        conversation.generate(follow_up, is_followup=True)
