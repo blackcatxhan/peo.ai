@@ -1,32 +1,29 @@
 import os
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 from dotenv import load_dotenv
 load_dotenv()
 
+# Cấu hình API key
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+
 def create_client():
-    return genai.Client(
-        api_key=os.environ.get("GEMINI_API_KEY"),
+    return genai.GenerativeModel(
+        model_name=os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
     )
 
 class Conversation:
     def __init__(self):
-        self.client = create_client()
-        self.model = "gemini-2.0-flash"
+        self.model = create_client()
+        self.model_name = "gemini-2.0-flash"
         self.conversation_history = [
-            types.Content(
-                role="user",
-                parts=[
-                    types.Part.from_text(text="""Here's my prompt:
+            {"role": "user", 
+             "parts": ["""Here's my prompt:
 
 <github_repo_code>
-Based on github repository codes given above, generate a creative-styled blog. Make sure to keep the blog fun and immersive for the readers. Use emojis."""),
-                ],
-            ),
-            types.Content(
-                role="model",
-                parts=[
-                    types.Part.from_text(text="""
+Based on github repository codes given above, generate a creative-styled blog. Make sure to keep the blog fun and immersive for the readers. Use emojis."""]
+            },
+            {"role": "model", 
+             "parts": ["""
 **Enhancements Made:**
 
 *   **Clarity and Specificity:** The original prompt was vague. The enhanced prompt specifies what aspects of the code to focus on, the target audience, and the desired tone.
@@ -71,9 +68,8 @@ After generating the blog post, briefly explain your creative choices. Why did y
 Blog Post (ready to be published on a platform like Medium or a personal website)
 ```Output Format```
 ```
-"""),
-                ],
-            ),
+"""]
+            },
         ]
         self.system_instruction = """Your task is to enhance and optimize prompts. Follow these guides to complete your task.
 
@@ -142,43 +138,52 @@ Be explicit about tradeoffs
         
         # Add user message to conversation history
         self.conversation_history.append(
-            types.Content(
-                role="user",
-                parts=[
-                    types.Part.from_text(text=formatted_prompt),
-                ],
-            )
+            {"role": "user", "parts": [formatted_prompt]}
         )
         
-        generate_content_config = types.GenerateContentConfig(
-            temperature=1,
-            top_p=0.95,
-            top_k=40,
-            max_output_tokens=8192,
-            response_mime_type="text/plain",
-            system_instruction=[
-                types.Part.from_text(text=self.system_instruction),
-            ],
-        )
+        generation_config = {
+            "temperature": 1,
+            "top_p": 0.95,
+            "top_k": 40,
+            "max_output_tokens": 8192,
+        }
+
+        safety_settings = [
+            {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            },
+            {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_MEDIUM_AND_ABOVE"
+            }
+        ]
 
         # Get the response
         response_text = ""
-        for chunk in self.client.models.generate_content_stream(
-            model=self.model,
-            contents=self.conversation_history,
-            config=generate_content_config,
-        ):
-            print(chunk.text, end="")
-            response_text += chunk.text if chunk.text is not None else ""
+        response = self.model.generate_content(
+            self.conversation_history,
+            generation_config=generation_config,
+            safety_settings=safety_settings,
+            stream=True
+        )
+        
+        for chunk in response:
+            if hasattr(chunk, 'text'):
+                print(chunk.text, end="")
+                response_text += chunk.text
         
         # Add model response to conversation history
         self.conversation_history.append(
-            types.Content(
-                role="model",
-                parts=[
-                    types.Part.from_text(text=response_text),
-                ],
-            )
+            {"role": "model", "parts": [response_text]}
         )
         print("\n")  # Add a newline after the complete response
 
